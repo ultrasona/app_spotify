@@ -9,7 +9,9 @@ import Config
 
 config :app_spotify,
   ecto_repos: [AppSpotify.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  spotify_client_id: System.get_env("SPOTIFY_CLIENT_ID"),
+  spotify_client_secret: System.get_env("SPOTIFY_CLIENT_SECRET")
 
 # Configures the endpoint
 config :app_spotify, AppSpotifyWeb.Endpoint,

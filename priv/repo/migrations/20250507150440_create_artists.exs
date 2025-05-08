@@ -9,6 +9,6 @@ defmodule AppSpotify.Repo.Migrations.CreateArtists do
       timestamps(type: :utc_datetime)
     end
 
-    create index(:artists, [:spotify_id])
+    create unique_index(:artists, [:spotify_id])
   end
 end

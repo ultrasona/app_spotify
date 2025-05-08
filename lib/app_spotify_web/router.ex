@@ -21,9 +21,11 @@ defmodule AppSpotifyWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", AppSpotifyWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", AppSpotifyWeb do
+    pipe_through :api
+
+    get "/albums", AlbumController, :list_by_artist
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:app_spotify, :dev_routes) do
