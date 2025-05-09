@@ -5,7 +5,7 @@ defmodule AppSpotify.Spotify do
   alias AppSpotify.Spotify.Artist
 
   @spotify_token_url "https://accounts.spotify.com/api/token"
-  @spotify_search_url "https://api.spotify.com/v1/search"
+  @spotify_api "https://api.spotify.com/v1"
 
   @doc """
   Returns the list of artists.
@@ -220,7 +220,22 @@ defmodule AppSpotify.Spotify do
     end
   end
 
+  def get_albums_by_artist_name(access_token, artist_name) do
+    artist = get_artist_by_name(access_token, artist_name)
+    albums = get_albums_by_artist(access_token, artist)
+    IO.inspect(albums)
+    albums
+  end
+
   def get_artist_by_name(access_token, artist_name) do
+
+    artist_name =
+      if String.contains?(artist_name, "%") do
+        String.replace(artist_name, "%", " ")
+      else
+        artist_name
+      end
+
     query =
       from a in Artist,
         where: a.name == ^artist_name,
@@ -250,17 +265,67 @@ defmodule AppSpotify.Spotify do
       end
 
     else
-      IO.puts("YEAHHHH")
+      IO.puts("artist in db")
+      IO.inspect(artist)
       artist
     end
   end
 
-  def get_albums_by_artist_name(access_token, artist) do
-    IO.puts("CANI GET A YEAHHHH")
+  def  get_albums_by_artist(access_token, artist) do
+    query =
+      from a in Album,
+        where: a.artist_id == ^artist.id
 
-    IO.inspect(artist)
-    IO.inspect(artist.id)
+    albums = Repo.all(query)
 
+    if albums == nil || albums == [] do
+      response = find_album(access_token, artist)
+
+      unknown_albums =
+        Enum.map(response["items"], fn album ->
+          album_name = album["name"]
+          date = album["release_date"]
+          id = artist.id
+
+          result =
+            %Album{}
+            |> Album.changeset(%{name: album_name, release_date: date, artist_id: id})
+            |> Repo.insert()
+
+          {:ok, album} = result
+
+          album
+        end)
+        unknown_albums
+    else
+      albums
+    end
+
+  end
+
+  defp find_album(access_token, artist) do
+    headers = [
+      {"Authorization", "Bearer #{access_token}"},
+      {"Content-Type", "application/json"}
+    ]
+
+    params = URI.encode_query(%{
+      "limit" => 50,
+      "include_groups" => "album"
+    })
+
+    url = "#{@spotify_api}/artists/#{artist.spotify_id}/albums?#{params}"
+
+    case HTTPoison.get(url, headers) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        Jason.decode!(body)
+
+      {:ok, %HTTPoison.Response{status_code: status, body: body}} ->
+        {:error, "Spotify search error: #{status} - #{body}"}
+
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        {:error, "HTTP error: #{reason}"}
+    end
   end
 
   defp find_artist(access_token, artist_name) do
@@ -275,7 +340,7 @@ defmodule AppSpotify.Spotify do
       "limit" => 1
     })
 
-    url = "#{@spotify_search_url}?#{params}"
+    url = "#{@spotify_api}/search?#{params}"
 
     case HTTPoison.get(url, headers) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->

@@ -14,8 +14,8 @@ defmodule AppSpotify.Spotify.Album do
   @doc false
   def changeset(album, attrs) do
     album
-    |> cast(attrs, [:name, :release_date])
-    |> validate_required([:name, :release_date])
+    |> cast(attrs, [:name, :release_date, :artist_id])
+    |> validate_required([:name, :release_date, :artist_id])
     |> assoc_constraint(:artist)
   end
 end
