@@ -23,11 +23,14 @@ defmodule AppSpotify.SpotifyFixtures do
   Generate a album.
   """
   def album_fixture(attrs \\ %{}) do
+    artist = artist_fixture()
+
     {:ok, album} =
       attrs
       |> Enum.into(%{
         name: "some name",
-        release_date: ~D[2025-05-06]
+        release_date: ~D[2025-05-06],
+        artist_id: artist.id
       })
       |> AppSpotify.Spotify.create_album()
 

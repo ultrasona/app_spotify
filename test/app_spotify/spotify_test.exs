@@ -77,11 +77,13 @@ defmodule AppSpotify.SpotifyTest do
     end
 
     test "create_album/1 with valid data creates a album" do
-      valid_attrs = %{name: "some name", release_date: ~D[2025-05-06]}
+      artist = artist_fixture()
+      valid_attrs = %{name: "some name", release_date: ~D[2025-05-06], artist_id: artist.id}
 
       assert {:ok, %Album{} = album} = Spotify.create_album(valid_attrs)
       assert album.name == "some name"
       assert album.release_date == ~D[2025-05-06]
+      assert album.artist_id == artist.id
     end
 
     test "create_album/1 with invalid data returns error changeset" do
