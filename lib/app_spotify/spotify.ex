@@ -4,8 +4,8 @@ defmodule AppSpotify.Spotify do
 
   alias AppSpotify.Spotify.Artist
 
-  @spotify_token_url "https://accounts.spotify.com/api/token"
-  @spotify_api "https://api.spotify.com/v1"
+  @behaviour AppSpotify.SpotifyBehaviour
+  @spotify_client Application.compile_env(:app_spotify, :spotify_client)
 
   @doc """
   Returns the list of artists.
@@ -197,33 +197,10 @@ defmodule AppSpotify.Spotify do
     Album.changeset(album, attrs)
   end
 
-  def get_access_token do
-    body = URI.encode_query(%{
-      "grant_type" => "client_credentials",
-      "client_id" => Application.get_env(:app_spotify, :spotify_client_id),
-      "client_secret" => Application.get_env(:app_spotify, :spotify_client_secret)
-    })
-
-    headers = [
-      {"Content-Type", "application/x-www-form-urlencoded"}
-    ]
-
-    case HTTPoison.post(@spotify_token_url, body, headers) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        {:ok, Jason.decode!(body)["access_token"]}
-
-      {:ok, %HTTPoison.Response{status_code: status, body: body}} ->
-        {:error, "Spotify token error: #{status} - #{body}"}
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, "HTTP error: #{reason}"}
-    end
-  end
-
   def get_albums_by_artist_name(access_token, artist_name) do
     artist = get_artist_by_name(access_token, artist_name)
     albums = get_albums_by_artist(access_token, artist)
-    IO.inspect(albums)
+
     albums
   end
 
@@ -244,7 +221,7 @@ defmodule AppSpotify.Spotify do
     artist = Repo.one(query)
 
     if artist == nil do
-      response = find_artist(access_token, artist_name)
+      response = get_artist(access_token, artist_name)
 
       case response["artists"]["items"] do
         [first_artist | _] ->
@@ -265,8 +242,6 @@ defmodule AppSpotify.Spotify do
       end
 
     else
-      IO.puts("artist in db")
-      IO.inspect(artist)
       artist
     end
   end
@@ -279,13 +254,22 @@ defmodule AppSpotify.Spotify do
     albums = Repo.all(query)
 
     if albums == nil || albums == [] do
-      response = find_album(access_token, artist)
+      response = get_albums_for_artist(access_token, artist)
 
       unknown_albums =
         Enum.map(response["items"], fn album ->
           album_name = album["name"]
-          date = album["release_date"]
+          #date = album["release_date"]
+          date_str = album["release_date"]
+          precision = album["release_date_precision"]
           id = artist.id
+
+          date =
+            case {date_str, precision} do
+              {date_str, "day"} -> Date.from_iso8601!(date_str)
+              {date_str, "month"} -> Date.from_iso8601!(date_str <> "-01")
+              {date_str, "year"} -> Date.from_iso8601!(date_str <> "-01-01")
+            end
 
           result =
             %Album{}
@@ -296,61 +280,14 @@ defmodule AppSpotify.Spotify do
 
           album
         end)
-        unknown_albums
+
+      unknown_albums
     else
       albums
     end
-
   end
 
-  defp find_album(access_token, artist) do
-    headers = [
-      {"Authorization", "Bearer #{access_token}"},
-      {"Content-Type", "application/json"}
-    ]
-
-    params = URI.encode_query(%{
-      "limit" => 50,
-      "include_groups" => "album"
-    })
-
-    url = "#{@spotify_api}/artists/#{artist.spotify_id}/albums?#{params}"
-
-    case HTTPoison.get(url, headers) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        Jason.decode!(body)
-
-      {:ok, %HTTPoison.Response{status_code: status, body: body}} ->
-        {:error, "Spotify search error: #{status} - #{body}"}
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, "HTTP error: #{reason}"}
-    end
-  end
-
-  defp find_artist(access_token, artist_name) do
-    headers = [
-      {"Authorization", "Bearer #{access_token}"},
-      {"Content-Type", "application/json"}
-    ]
-
-    params = URI.encode_query(%{
-      "q" => "artist:#{artist_name}",
-      "type" => "artist",
-      "limit" => 1
-    })
-
-    url = "#{@spotify_api}/search?#{params}"
-
-    case HTTPoison.get(url, headers) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        Jason.decode!(body)
-
-      {:ok, %HTTPoison.Response{status_code: status, body: body}} ->
-        {:error, "Spotify search error: #{status} - #{body}"}
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, "HTTP error: #{reason}"}
-    end
-  end
+  def get_access_token, do: @spotify_client.get_access_token()
+  def get_albums_for_artist(token, name), do: @spotify_client.get_albums_for_artist(token, name)
+  def get_artist(token, name), do: @spotify_client.get_artist(token, name)
 end

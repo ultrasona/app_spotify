@@ -58,7 +58,9 @@ defmodule AppSpotify.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:httpoison, "~> 1.8"}
+      {:httpoison, "~> 1.8"},
+      {:mox, "~> 1.0", only: :test},
+      {:ex_doc, "~> 0.30", only: :dev, runtime: false}
     ]
   end
 
