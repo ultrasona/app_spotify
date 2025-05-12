@@ -259,7 +259,6 @@ defmodule AppSpotify.Spotify do
       unknown_albums =
         Enum.map(response["items"], fn album ->
           album_name = album["name"]
-          #date = album["release_date"]
           date_str = album["release_date"]
           precision = album["release_date_precision"]
           id = artist.id

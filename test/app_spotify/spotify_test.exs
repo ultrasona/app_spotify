@@ -3,6 +3,10 @@ defmodule AppSpotify.SpotifyTest do
 
   alias AppSpotify.Spotify
 
+  use ExUnit.Case, async: true
+  import Mox
+  setup :verify_on_exit!
+
   describe "artists" do
     alias AppSpotify.Spotify.Artist
 
@@ -116,4 +120,23 @@ defmodule AppSpotify.SpotifyTest do
       assert %Ecto.Changeset{} = Spotify.change_album(album)
     end
   end
+
+  # describe "albums by artist" do
+  #   test "get_albums_by_artist_name/2 returns albums for a given artist" do
+  #     token = "fake_token"
+  #     artist_name = "Otyken"
+
+  #     artist = %AppSpotify.Spotify.Artist{id: "artist123", name: "Otyken"}
+  #     albums = [
+  #       %AppSpotify.Spotify.Album{name: "Phenomenon", release_date: ~D[2023-02-24]},
+  #       %AppSpotify.Spotify.Album{name: "Kykakacha", release_date: ~D[2021-06-17]}
+  #     ]
+
+  #     AppSpotify.SpotifyMock
+  #     |> expect(:get_artist, fn {^token, ^artist_name} -> artist end)
+  #     |> expect(:get_albums_for_artist, fn {^token, ^artist} -> albums end)
+
+  #     assert Spotify.get_albums_by_artist_name(token, artist_name) == albums
+  #   end
+  # end
 end
