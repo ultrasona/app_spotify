@@ -35,7 +35,7 @@ docker compose up
 ### Setup project environment
 
 - Run `mix setup` to install and setup dependencies
-- Creates a `.env` file based on the `.env.expl` file and to forget to add the real credential instead of the place holders
+- Creates a `.env` file based on the `.env.expl` file and to forget to add the real credential instead of the place holders. If you don't already have your credential you can follow [this tutorial](https://developer.spotify.com/documentation/web-api/tutorials/getting-started#create-an-app) to do so.
 
 ### How to run
 The web server:
