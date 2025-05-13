@@ -83,10 +83,10 @@ You can now call the route!
 ```
 
 #### Error example
-For a 401
+For a 400
 ```
 {
-  "error": "unauthorized"
+  "error": "invalid client"
 }
 ```
 

@@ -25,8 +25,7 @@ defmodule AppSpotifyWeb.AlbumControllerTest do
     ]
   end
 
-  # In normal life I would have test the errors....
-  #but my mock is not working and I can't make it work.
+  # TODO make this test works with Mock since Mox don't seem to work
 
   # test "GET /api/albums returns error when access token fails", %{conn: conn} do
   #   AppSpotify.SpotifyMock

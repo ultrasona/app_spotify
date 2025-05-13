@@ -121,6 +121,7 @@ defmodule AppSpotify.SpotifyTest do
     end
   end
 
+  # TODO same issue than in the controller the mock ain't working.
   # describe "albums by artist" do
   #   test "get_albums_by_artist_name/2 returns albums for a given artist" do
   #     token = "fake_token"
