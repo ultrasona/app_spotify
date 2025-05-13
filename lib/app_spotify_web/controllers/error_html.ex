@@ -4,7 +4,7 @@ defmodule AppSpotifyWeb.ErrorHTML do
 
   See config/config.exs.
   """
-  use AppSpotifyWeb, :html
+  # use AppSpotifyWeb, :html
 
   # If you want to customize your error pages,
   # uncomment the embed_templates/1 call below

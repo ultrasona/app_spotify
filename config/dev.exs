@@ -23,11 +23,7 @@ config :app_spotify, AppSpotifyWeb.Endpoint,
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
-  secret_key_base: "+8fvTV/FVcsxMNZWdtou6z2JgSbCn3pXBE81j9wRkf/oQ8mKFtq6z9lWygMcWGrU",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:app_spotify, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:app_spotify, ~w(--watch)]}
-  ]
+  secret_key_base: "+8fvTV/FVcsxMNZWdtou6z2JgSbCn3pXBE81j9wRkf/oQ8mKFtq6z9lWygMcWGrU"
 
 # ## SSL Support
 #
